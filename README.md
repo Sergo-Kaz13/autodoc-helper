@@ -9,7 +9,7 @@ by article, brand or category.
 
 Click the link below — Tampermonkey will open automatically:
 
-[![Install](https://img.shields.io/badge/Install-Tampermonkey-green)](https://raw.githubusercontent.com/Sergo-Kaz13/autodoc-helper/main/scripts/m13-warehouse-helper.user.js)
+[![Install](https://img.shields.io/badge/Install-Tampermonkey-green)](https://raw.githubusercontent.com/Sergo-Kaz13/autodoc-helper/main/scripts/warehouse-helper.user.js)
 
 ## ✨ Features
 
