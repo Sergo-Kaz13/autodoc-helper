@@ -1,3 +1,8 @@
+import { login } from "./modules/login.js";
+import { printAWS } from "./modules/printAWS.js";
+import { printTWO } from "./modules/printTWO.js";
+import { filterTable } from "./modules/filterTable.js";
+
 (function () {
   "use strict";
   let observer = null;
