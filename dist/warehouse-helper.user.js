@@ -21,54 +21,55 @@
 /*!************************************!*\
   !*** ./src/modules/filterTable.js ***!
   \************************************/
-(__unused_webpack_module, exports) {
+() {
 
 
 
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports.filterTable = filterTable;
 function filterTable() {
   let searchType = "Article No"; // Default search type
   // Get table reference
   let table = document.querySelector("table");
-  function initialTfood() {
-    const tfood = document.createElement("tfoot");
-    const tfoodRow = document.createElement("tr");
-    const tfoodCell1 = document.createElement("td");
-    tfoodRow.appendChild(tfoodCell1);
-    const tfoodCell2 = document.createElement("td");
-    tfoodRow.appendChild(tfoodCell2);
-    const tfoodCell3 = document.createElement("td");
-    tfoodRow.appendChild(tfoodCell3);
-    const tfoodCell4 = document.createElement("td");
-    tfoodRow.appendChild(tfoodCell4);
-    const tfoodCell5 = document.createElement("td");
-    tfoodCell5.id = "totalQty";
-    tfoodCell5.style.color = "red";
-    tfoodCell5.style.fontWeight = "bold";
-    tfoodCell5.style.backgroundColor = "white";
-    tfoodCell5.textContent = "0";
-    tfoodRow.appendChild(tfoodCell5);
-    const tfoodCell6 = document.createElement("td");
-    tfoodCell6.id = "totalPackedQty";
-    tfoodCell6.style.color = "red";
-    tfoodCell6.style.fontWeight = "bold";
-    tfoodCell6.style.backgroundColor = "white";
-    tfoodCell6.textContent = "0";
-    tfoodRow.appendChild(tfoodCell6);
-    const tfoodCell7 = document.createElement("td");
-    tfoodRow.appendChild(tfoodCell7);
-    const tfoodCell8 = document.createElement("td");
-    tfoodRow.appendChild(tfoodCell8);
-    const tfoodCell9 = document.createElement("td");
-    tfoodRow.appendChild(tfoodCell9);
-    tfood.appendChild(tfoodRow);
-    table.appendChild(tfood);
+  function initialTfoot() {
+    const existing = table.querySelector("tfoot");
+    if (existing) existing.remove();
+    const tfoot = document.createElement("tfoot");
+    const tfootRow = document.createElement("tr");
+    const tfootCell1 = document.createElement("td");
+    tfootRow.appendChild(tfootCell1);
+    const tfootCell2 = document.createElement("td");
+    tfootRow.appendChild(tfootCell2);
+    const tfootCell3 = document.createElement("td");
+    tfootRow.appendChild(tfootCell3);
+    const tfootCell4 = document.createElement("td");
+    tfootRow.appendChild(tfootCell4);
+    const tfootCell5 = document.createElement("td");
+    tfootCell5.id = "totalQty";
+    tfootCell5.style.color = "red";
+    tfootCell5.style.fontWeight = "bold";
+    tfootCell5.style.backgroundColor = "white";
+    tfootCell5.textContent = "0";
+    tfootRow.appendChild(tfootCell5);
+    const tfootCell6 = document.createElement("td");
+    tfootCell6.id = "totalPackedQty";
+    tfootCell6.style.color = "red";
+    tfootCell6.style.fontWeight = "bold";
+    tfootCell6.style.backgroundColor = "white";
+    tfootCell6.textContent = "0";
+    tfootRow.appendChild(tfootCell6);
+    const tfootCell7 = document.createElement("td");
+    tfootRow.appendChild(tfootCell7);
+    const tfootCell8 = document.createElement("td");
+    tfootRow.appendChild(tfootCell8);
+    const tfootCell9 = document.createElement("td");
+    tfootRow.appendChild(tfootCell9);
+    tfoot.appendChild(tfootRow);
+    table.appendChild(tfoot);
   }
   // Function to calculate totals
   function calculateTotals() {
+    const totalQtyEl = document.getElementById("totalQty");
+    const totalPackedQtyEl = document.getElementById("totalPackedQty");
+    if (!totalQtyEl || !totalPackedQtyEl) return;
     const rows = table.querySelectorAll("tbody tr");
     let totalQty = 0;
     let totalPackedQty = 0;
@@ -80,11 +81,11 @@ function filterTable() {
         totalPackedQty += parseInt(packedQtyCell.textContent) || 0;
       }
     });
-    document.getElementById("totalQty").textContent = totalQty;
-    document.getElementById("totalPackedQty").textContent = totalPackedQty;
+    totalQtyEl.textContent = totalQty;
+    totalPackedQtyEl.textContent = totalPackedQty;
   }
-  //initialTfood();
-  //calculateTotals();
+  initialTfoot();
+  calculateTotals();
   // Create search block
   const searchBlock = document.createElement("div");
   searchBlock.style.position = "fixed";
@@ -212,10 +213,14 @@ function filterTable() {
   const observer = new MutationObserver(() => {
     const newTable = document.querySelector("table");
     if (newTable && newTable !== table) {
+      observer.disconnect();
       table = newTable;
-
-      //initialTfood();
-      //calculateTotals();
+      initialTfoot();
+      calculateTotals();
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
     }
   });
   observer.observe(document.body, {
@@ -324,6 +329,13 @@ function login() {
   // --------------------------
   function openModal(content) {
     closeModal();
+    const blockFocus = e => {
+      if (!modal.contains(e.target)) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    };
+    document.addEventListener("focus", blockFocus, true);
     modal = document.createElement("div");
     modal.style.position = "fixed";
     modal.style.inset = "0";
@@ -331,7 +343,7 @@ function login() {
     modal.style.display = "flex";
     modal.style.alignItems = "center";
     modal.style.justifyContent = "center";
-    modal.style.zIndex = "9999";
+    modal.style.zIndex = "10000";
     const box = document.createElement("div");
     box.style.background = "#2B2B2B";
     box.style.padding = "20px";
@@ -341,9 +353,19 @@ function login() {
     box.appendChild(content);
     modal.appendChild(box);
     document.body.appendChild(modal);
+    setTimeout(() => {
+      const firstInput = modal.querySelector("input");
+      if (firstInput) firstInput.focus();
+    }, 0);
+
+    // Зберігаємо щоб потім зняти
+    modal._blockFocus = blockFocus;
   }
   function closeModal() {
-    if (modal) modal.remove();
+    if (modal) {
+      document.removeEventListener("focus", modal._blockFocus, true);
+      modal.remove();
+    }
     modal = null;
   } // --------------------------
   // Render User Actions
@@ -698,15 +720,15 @@ var _filterTable = __webpack_require__(/*! ./modules/filterTable.js */ "./src/mo
   "use strict";
 
   const routes = [{
-    // match: /^\/login/,
-    match: /\/login/,
+    match: /^\/login/,
+    // match: /\/login/,
     action: _login.login,
     cleanup: () => {
       document.getElementById("btnPrintAWSAuto")?.remove();
     }
   }, {
-    // match: /^\/packing-transfer/,
-    match: /\/packing-transfer/,
+    match: /^\/packing-transfer/,
+    // match: /\/packing-transfer/,
     action: () => {
       (0, _printAWS.printAWS)();
       (0, _printTWO.printTWO)();
