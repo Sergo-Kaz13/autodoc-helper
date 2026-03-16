@@ -84,6 +84,14 @@ export function login() {
   // --------------------------
   function openModal(content) {
     closeModal();
+    const blockFocus = (e) => {
+      if (!modal.contains(e.target)) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    };
+    document.addEventListener("focus", blockFocus, true);
+
     modal = document.createElement("div");
     modal.style.position = "fixed";
     modal.style.inset = "0";
@@ -91,7 +99,7 @@ export function login() {
     modal.style.display = "flex";
     modal.style.alignItems = "center";
     modal.style.justifyContent = "center";
-    modal.style.zIndex = "9999";
+    modal.style.zIndex = "10000";
     const box = document.createElement("div");
     box.style.background = "#2B2B2B";
     box.style.padding = "20px";
@@ -101,9 +109,20 @@ export function login() {
     box.appendChild(content);
     modal.appendChild(box);
     document.body.appendChild(modal);
+
+    setTimeout(() => {
+      const firstInput = modal.querySelector("input");
+      if (firstInput) firstInput.focus();
+    }, 0);
+
+    // Зберігаємо щоб потім зняти
+    modal._blockFocus = blockFocus;
   }
   function closeModal() {
-    if (modal) modal.remove();
+    if (modal) {
+      document.removeEventListener("focus", modal._blockFocus, true);
+      modal.remove();
+    }
     modal = null;
   } // --------------------------
   // Render User Actions
