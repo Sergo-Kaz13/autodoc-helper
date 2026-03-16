@@ -7,16 +7,16 @@ import { filterTable } from "./modules/filterTable.js";
   "use strict";
   const routes = [
     {
-      // match: /^\/login/,
-      match: /\/login/,
+      match: /^\/login/,
+      // match: /\/login/,
       action: login,
       cleanup: () => {
         document.getElementById("btnPrintAWSAuto")?.remove();
       },
     },
     {
-      // match: /^\/packing-transfer/,
-      match: /\/packing-transfer/,
+      match: /^\/packing-transfer/,
+      // match: /\/packing-transfer/,
       action: () => {
         printAWS();
         printTWO();
