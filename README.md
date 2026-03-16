@@ -1,15 +1,15 @@
 # 🏭 M13 Warehouse Helper
 
-Tampermonkey userscript for m13.autodoc.de that automates 
-daily warehouse tasks: one-click auto-login, automatic AWS 
-label printing, TWO order processing, and table filtering 
+Tampermonkey userscript for m13.autodoc.de that automates
+daily warehouse tasks: one-click auto-login, automatic AWS
+label printing, TWO order processing, and table filtering
 by article, brand or category.
 
 ## ⚡ Install
 
 Click the link below — Tampermonkey will open automatically:
 
-[![Install](https://img.shields.io/badge/Install-Tampermonkey-green)](https://raw.githubusercontent.com/Sergo-Kaz13/autodoc-helper/main/scripts/warehouse-helper.user.js)
+[![Install](https://img.shields.io/badge/Install-Tampermonkey-green)](https://raw.githubusercontent.com/Sergo-Kaz13/autodoc-helper/main/dist/warehouse-helper.user.js)
 
 ## ✨ Features
 
