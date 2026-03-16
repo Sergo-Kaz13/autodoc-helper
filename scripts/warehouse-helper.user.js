@@ -1,6 +1,6 @@
 (function () {
   "use strict";
-  let observer = null;
+
   const routes = [
     {
       match: /^\/login/,

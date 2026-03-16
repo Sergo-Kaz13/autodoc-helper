@@ -4,6 +4,7 @@
 // @version      1.0.0
 // @description  Automates warehouse workflow on m13.autodoc.de: auto-login, AWS/TWO printing and table filtering
 // @author       Sergo_Kaz
+// @match        http://127.0.0.1:5500/*
 // @match        https://m13.autodoc.de/*
 // @grant        none
 // @icon         https://png.pngtree.com/png-clipart/20191122/original/pngtree-hammer-and-wrench-vector-illustration-with-simple-design-isolated-on-white-png-image_5162773.jpg
@@ -12,27 +13,9 @@
 // @downloadURL  https://raw.githubusercontent.com/Sergo-Kaz13/autodoc-helper/main/dist/warehouse-helper.user.js
 // ==/UserScript==
 
-/*
- * ATTENTION: The "eval" devtool has been used (maybe by default in mode: "development").
- * This devtool is neither made for production nor for readable output files.
- * It uses "eval()" calls to create a separate source file in the browser devtools.
- * If you are trying to read the output file, select a different devtool (https://webpack.js.org/configuration/devtool/)
- * or disable the default devtool with "devtool: false".
- * If you are looking for production-ready output files, see mode: "production" (https://webpack.js.org/configuration/mode/).
- */
 /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
-
-/***/ "./src/index.js"
-/*!**********************!*\
-  !*** ./src/index.js ***!
-  \**********************/
-(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
-
-eval("{\n\nvar _login = __webpack_require__(/*! ./modules/login.js */ \"./src/modules/login.js\");\nvar _printAWS = __webpack_require__(/*! ./modules/printAWS.js */ \"./src/modules/printAWS.js\");\nvar _printTWO = __webpack_require__(/*! ./modules/printTWO.js */ \"./src/modules/printTWO.js\");\nvar _filterTable = __webpack_require__(/*! ./modules/filterTable.js */ \"./src/modules/filterTable.js\");\n(function () {\n  \"use strict\";\n\n  let observer = null;\n  const routes = [{\n    match: /^\\/login/,\n    action: _login.login,\n    cleanup: () => {\n      observer?.disconnect();\n      observer = null;\n      document.getElementById(\"btnPrintAWSAuto\")?.remove();\n    }\n  }, {\n    match: /^\\/packing-transfer/,\n    action: () => {\n      (0, _printAWS.printAWS)();\n      (0, _printTWO.printTWO)();\n      (0, _filterTable.filterTable)();\n    },\n    cleanup: () => {\n      document.getElementById(\"btnContainer\")?.remove();\n      document.getElementById(\"btnPrintTWO\")?.remove();\n    }\n  }];\n  let currentRoute = null;\n  function router() {\n    const path = location.pathname;\n    if (currentRoute?.cleanup) {\n      currentRoute.cleanup();\n    }\n    for (const r of routes) {\n      if (r.match.test(path)) {\n        currentRoute = r;\n        r.action();\n        return;\n      }\n    }\n  }\n\n  // --- SPA navigation hook ---\n  const push = history.pushState;\n  history.pushState = function () {\n    push.apply(this, arguments);\n    router();\n  };\n  const replace = history.replaceState;\n  history.replaceState = function () {\n    replace.apply(this, arguments);\n    router();\n  };\n  window.addEventListener(\"popstate\", router);\n  router();\n})();\n\n//# sourceURL=webpack://autodoc-helper/./src/index.js?\n}");
-
-/***/ },
 
 /***/ "./src/modules/filterTable.js"
 /*!************************************!*\
@@ -40,7 +23,206 @@ eval("{\n\nvar _login = __webpack_require__(/*! ./modules/login.js */ \"./src/mo
   \************************************/
 (__unused_webpack_module, exports) {
 
-eval("{\n\nObject.defineProperty(exports, \"__esModule\", ({\n  value: true\n}));\nexports.filterTable = filterTable;\nfunction filterTable() {\n  let searchType = \"Article No\"; // Default search type\n  // Get table reference\n  let table = document.querySelector(\"table\");\n  function initialTfood() {\n    const tfood = document.createElement(\"tfoot\");\n    const tfoodRow = document.createElement(\"tr\");\n    const tfoodCell1 = document.createElement(\"td\");\n    tfoodRow.appendChild(tfoodCell1);\n    const tfoodCell2 = document.createElement(\"td\");\n    tfoodRow.appendChild(tfoodCell2);\n    const tfoodCell3 = document.createElement(\"td\");\n    tfoodRow.appendChild(tfoodCell3);\n    const tfoodCell4 = document.createElement(\"td\");\n    tfoodRow.appendChild(tfoodCell4);\n    const tfoodCell5 = document.createElement(\"td\");\n    tfoodCell5.id = \"totalQty\";\n    tfoodCell5.style.color = \"red\";\n    tfoodCell5.style.fontWeight = \"bold\";\n    tfoodCell5.style.backgroundColor = \"white\";\n    tfoodCell5.textContent = \"0\";\n    tfoodRow.appendChild(tfoodCell5);\n    const tfoodCell6 = document.createElement(\"td\");\n    tfoodCell6.id = \"totalPackedQty\";\n    tfoodCell6.style.color = \"red\";\n    tfoodCell6.style.fontWeight = \"bold\";\n    tfoodCell6.style.backgroundColor = \"white\";\n    tfoodCell6.textContent = \"0\";\n    tfoodRow.appendChild(tfoodCell6);\n    const tfoodCell7 = document.createElement(\"td\");\n    tfoodRow.appendChild(tfoodCell7);\n    const tfoodCell8 = document.createElement(\"td\");\n    tfoodRow.appendChild(tfoodCell8);\n    const tfoodCell9 = document.createElement(\"td\");\n    tfoodRow.appendChild(tfoodCell9);\n    tfood.appendChild(tfoodRow);\n    table.appendChild(tfood);\n  }\n  // Function to calculate totals\n  function calculateTotals() {\n    const rows = table.querySelectorAll(\"tbody tr\");\n    let totalQty = 0;\n    let totalPackedQty = 0;\n    rows.forEach(row => {\n      if (row.style.display !== \"none\") {\n        const qtyCell = row.cells[4];\n        const packedQtyCell = row.cells[5];\n        totalQty += parseInt(qtyCell.textContent) || 0;\n        totalPackedQty += parseInt(packedQtyCell.textContent) || 0;\n      }\n    });\n    document.getElementById(\"totalQty\").textContent = totalQty;\n    document.getElementById(\"totalPackedQty\").textContent = totalPackedQty;\n  }\n  //initialTfood();\n  //calculateTotals();\n  // Create search block\n  const searchBlock = document.createElement(\"div\");\n  searchBlock.style.position = \"fixed\";\n  searchBlock.style.bottom = \"10px\";\n  searchBlock.style.right = \"10px\";\n  searchBlock.style.padding = \"10px\";\n  searchBlock.style.backgroundColor = \"rgba(255, 255, 255, 0.8)\";\n  searchBlock.style.border = \"1px solid #ccc\";\n  searchBlock.style.borderRadius = \"5px\";\n  searchBlock.style.zIndex = \"1000\";\n  searchBlock.style.display = \"none\";\n  searchBlock.id = \"searchBlock\";\n  // Block for input and reset button\n  const blockInput = document.createElement(\"div\");\n  blockInput.style.display = \"flex\";\n  blockInput.style.gap = \"5px\";\n  searchBlock.appendChild(blockInput);\n  // Search input\n  const input = document.createElement(\"input\");\n  input.type = \"text\";\n  input.placeholder = \"Search\";\n  input.style.width = \"100%\";\n  blockInput.appendChild(input);\n  input.addEventListener(\"input\", () => {\n    const searchTerm = input.value.toLowerCase().trim();\n    const thIndex = searchIndexColumn(table, searchType);\n    getDataRows(thIndex, table, searchTerm);\n  });\n  // Reset button\n  const resetButton = document.createElement(\"button\");\n  resetButton.innerHTML = \"&#10005;\";\n  resetButton.style.background = \"transparent\";\n  resetButton.style.border = \"none\";\n  resetButton.style.cursor = \"pointer\";\n  resetButton.style.color = \"red\";\n  resetButton.style.fontWeight = \"bold\";\n  blockInput.appendChild(resetButton);\n  // Reset input on button click\n  resetButton.addEventListener(\"click\", () => {\n    input.value = \"\";\n    const thIndex = searchIndexColumn(table, searchType);\n    getDataRows(thIndex, table);\n    input.focus();\n  });\n  // Radio buttons for search type\n  const radioBlock = document.createElement(\"div\");\n  radioBlock.style.marginTop = \"10px\";\n  const radio1 = document.createElement(\"input\");\n  radio1.type = \"radio\";\n  radio1.name = \"searchType\";\n  radio1.value = \"Article No\";\n  radio1.id = \"articleNo\";\n  radio1.checked = true;\n  const label1 = document.createElement(\"label\");\n  label1.htmlFor = \"articleNo\";\n  label1.textContent = \"Article No\";\n  radioBlock.appendChild(radio1);\n  radioBlock.appendChild(label1);\n  const radio2 = document.createElement(\"input\");\n  radio2.type = \"radio\";\n  radio2.name = \"searchType\";\n  radio2.value = \"Brand\";\n  radio2.id = \"brand\";\n  const label2 = document.createElement(\"label\");\n  label2.htmlFor = \"brand\";\n  label2.textContent = \"Brand\";\n  radioBlock.appendChild(radio2);\n  radioBlock.appendChild(label2);\n  const radio3 = document.createElement(\"input\");\n  radio3.type = \"radio\";\n  radio3.name = \"searchType\";\n  radio3.value = \"Category\";\n  radio3.id = \"category\";\n  const label3 = document.createElement(\"label\");\n  label3.htmlFor = \"category\";\n  label3.textContent = \"Category\";\n  radioBlock.appendChild(radio3);\n  radioBlock.appendChild(label3);\n  // End of radio buttons\n  // Toggle search block with Ctrl + Shift + F\n  document.addEventListener(\"keydown\", e => {\n    if (e.ctrlKey && e.shiftKey && e.key === \"F\") {\n      searchBlock.style.display = searchBlock.style.display === \"none\" ? \"block\" : \"none\";\n      if (searchBlock.style.display === \"none\") {\n        input.value = \"\";\n        const thIndex = searchIndexColumn(table, searchType);\n        getDataRows(thIndex, table);\n      } else {\n        input.focus();\n      }\n    }\n  });\n  // Update search type on radio button change\n  // Log selected search type\n  radioBlock.addEventListener(\"change\", e => {\n    searchType = e.target.value;\n    const thIndex = searchIndexColumn(table, searchType);\n    getDataRows(thIndex, table, input.value.toLowerCase().trim());\n  });\n  searchBlock.appendChild(radioBlock);\n  document.body.appendChild(searchBlock);\n  // Function to find the index of the column based on the search type\n  function searchIndexColumn(table, searchType) {\n    const th = table.querySelectorAll(\"thead th\");\n    const thArray = Array.from(th);\n    const thIndex = thArray.findIndex(th => th.textContent.toLowerCase().trim() === searchType.toLowerCase().trim());\n    return thIndex;\n  }\n  // Log the index of the column to be searched\n  function getDataRows(thIndex, table, searchTerm = \"\") {\n    if (thIndex !== -1) {\n      const rows = table.querySelectorAll(\"tbody tr\");\n      rows.forEach(row => {\n        const cells = row.cells[thIndex];\n        const cellText = cells.textContent.toLowerCase().trim();\n        if (cellText.includes(searchTerm)) {\n          row.style.display = \"\";\n        } else {\n          row.style.display = \"none\";\n        }\n      });\n      calculateTotals();\n    }\n  }\n  const observer = new MutationObserver(() => {\n    const newTable = document.querySelector(\"table\");\n    if (newTable && newTable !== table) {\n      table = newTable;\n\n      //initialTfood();\n      //calculateTotals();\n    }\n  });\n  observer.observe(document.body, {\n    childList: true,\n    subtree: true\n  });\n}\n\n//# sourceURL=webpack://autodoc-helper/./src/modules/filterTable.js?\n}");
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.filterTable = filterTable;
+function filterTable() {
+  let searchType = "Article No"; // Default search type
+  // Get table reference
+  let table = document.querySelector("table");
+  function initialTfood() {
+    const tfood = document.createElement("tfoot");
+    const tfoodRow = document.createElement("tr");
+    const tfoodCell1 = document.createElement("td");
+    tfoodRow.appendChild(tfoodCell1);
+    const tfoodCell2 = document.createElement("td");
+    tfoodRow.appendChild(tfoodCell2);
+    const tfoodCell3 = document.createElement("td");
+    tfoodRow.appendChild(tfoodCell3);
+    const tfoodCell4 = document.createElement("td");
+    tfoodRow.appendChild(tfoodCell4);
+    const tfoodCell5 = document.createElement("td");
+    tfoodCell5.id = "totalQty";
+    tfoodCell5.style.color = "red";
+    tfoodCell5.style.fontWeight = "bold";
+    tfoodCell5.style.backgroundColor = "white";
+    tfoodCell5.textContent = "0";
+    tfoodRow.appendChild(tfoodCell5);
+    const tfoodCell6 = document.createElement("td");
+    tfoodCell6.id = "totalPackedQty";
+    tfoodCell6.style.color = "red";
+    tfoodCell6.style.fontWeight = "bold";
+    tfoodCell6.style.backgroundColor = "white";
+    tfoodCell6.textContent = "0";
+    tfoodRow.appendChild(tfoodCell6);
+    const tfoodCell7 = document.createElement("td");
+    tfoodRow.appendChild(tfoodCell7);
+    const tfoodCell8 = document.createElement("td");
+    tfoodRow.appendChild(tfoodCell8);
+    const tfoodCell9 = document.createElement("td");
+    tfoodRow.appendChild(tfoodCell9);
+    tfood.appendChild(tfoodRow);
+    table.appendChild(tfood);
+  }
+  // Function to calculate totals
+  function calculateTotals() {
+    const rows = table.querySelectorAll("tbody tr");
+    let totalQty = 0;
+    let totalPackedQty = 0;
+    rows.forEach(row => {
+      if (row.style.display !== "none") {
+        const qtyCell = row.cells[4];
+        const packedQtyCell = row.cells[5];
+        totalQty += parseInt(qtyCell.textContent) || 0;
+        totalPackedQty += parseInt(packedQtyCell.textContent) || 0;
+      }
+    });
+    document.getElementById("totalQty").textContent = totalQty;
+    document.getElementById("totalPackedQty").textContent = totalPackedQty;
+  }
+  //initialTfood();
+  //calculateTotals();
+  // Create search block
+  const searchBlock = document.createElement("div");
+  searchBlock.style.position = "fixed";
+  searchBlock.style.bottom = "10px";
+  searchBlock.style.right = "10px";
+  searchBlock.style.padding = "10px";
+  searchBlock.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
+  searchBlock.style.border = "1px solid #ccc";
+  searchBlock.style.borderRadius = "5px";
+  searchBlock.style.zIndex = "1000";
+  searchBlock.style.display = "none";
+  searchBlock.id = "searchBlock";
+  // Block for input and reset button
+  const blockInput = document.createElement("div");
+  blockInput.style.display = "flex";
+  blockInput.style.gap = "5px";
+  searchBlock.appendChild(blockInput);
+  // Search input
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "Search";
+  input.style.width = "100%";
+  blockInput.appendChild(input);
+  input.addEventListener("input", () => {
+    const searchTerm = input.value.toLowerCase().trim();
+    const thIndex = searchIndexColumn(table, searchType);
+    getDataRows(thIndex, table, searchTerm);
+  });
+  // Reset button
+  const resetButton = document.createElement("button");
+  resetButton.innerHTML = "&#10005;";
+  resetButton.style.background = "transparent";
+  resetButton.style.border = "none";
+  resetButton.style.cursor = "pointer";
+  resetButton.style.color = "red";
+  resetButton.style.fontWeight = "bold";
+  blockInput.appendChild(resetButton);
+  // Reset input on button click
+  resetButton.addEventListener("click", () => {
+    input.value = "";
+    const thIndex = searchIndexColumn(table, searchType);
+    getDataRows(thIndex, table);
+    input.focus();
+  });
+  // Radio buttons for search type
+  const radioBlock = document.createElement("div");
+  radioBlock.style.marginTop = "10px";
+  const radio1 = document.createElement("input");
+  radio1.type = "radio";
+  radio1.name = "searchType";
+  radio1.value = "Article No";
+  radio1.id = "articleNo";
+  radio1.checked = true;
+  const label1 = document.createElement("label");
+  label1.htmlFor = "articleNo";
+  label1.textContent = "Article No";
+  radioBlock.appendChild(radio1);
+  radioBlock.appendChild(label1);
+  const radio2 = document.createElement("input");
+  radio2.type = "radio";
+  radio2.name = "searchType";
+  radio2.value = "Brand";
+  radio2.id = "brand";
+  const label2 = document.createElement("label");
+  label2.htmlFor = "brand";
+  label2.textContent = "Brand";
+  radioBlock.appendChild(radio2);
+  radioBlock.appendChild(label2);
+  const radio3 = document.createElement("input");
+  radio3.type = "radio";
+  radio3.name = "searchType";
+  radio3.value = "Category";
+  radio3.id = "category";
+  const label3 = document.createElement("label");
+  label3.htmlFor = "category";
+  label3.textContent = "Category";
+  radioBlock.appendChild(radio3);
+  radioBlock.appendChild(label3);
+  // End of radio buttons
+  // Toggle search block with Ctrl + Shift + F
+  document.addEventListener("keydown", e => {
+    if (e.ctrlKey && e.shiftKey && e.key === "F") {
+      searchBlock.style.display = searchBlock.style.display === "none" ? "block" : "none";
+      if (searchBlock.style.display === "none") {
+        input.value = "";
+        const thIndex = searchIndexColumn(table, searchType);
+        getDataRows(thIndex, table);
+      } else {
+        input.focus();
+      }
+    }
+  });
+  // Update search type on radio button change
+  // Log selected search type
+  radioBlock.addEventListener("change", e => {
+    searchType = e.target.value;
+    const thIndex = searchIndexColumn(table, searchType);
+    getDataRows(thIndex, table, input.value.toLowerCase().trim());
+  });
+  searchBlock.appendChild(radioBlock);
+  document.body.appendChild(searchBlock);
+  // Function to find the index of the column based on the search type
+  function searchIndexColumn(table, searchType) {
+    const th = table.querySelectorAll("thead th");
+    const thArray = Array.from(th);
+    const thIndex = thArray.findIndex(th => th.textContent.toLowerCase().trim() === searchType.toLowerCase().trim());
+    return thIndex;
+  }
+  // Log the index of the column to be searched
+  function getDataRows(thIndex, table, searchTerm = "") {
+    if (thIndex !== -1) {
+      const rows = table.querySelectorAll("tbody tr");
+      rows.forEach(row => {
+        const cells = row.cells[thIndex];
+        const cellText = cells.textContent.toLowerCase().trim();
+        if (cellText.includes(searchTerm)) {
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
+        }
+      });
+      calculateTotals();
+    }
+  }
+  const observer = new MutationObserver(() => {
+    const newTable = document.querySelector("table");
+    if (newTable && newTable !== table) {
+      table = newTable;
+
+      //initialTfood();
+      //calculateTotals();
+    }
+  });
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+}
 
 /***/ },
 
@@ -50,7 +232,195 @@ eval("{\n\nObject.defineProperty(exports, \"__esModule\", ({\n  value: true\n}))
   \******************************/
 (__unused_webpack_module, exports) {
 
-eval("{\n\nObject.defineProperty(exports, \"__esModule\", ({\n  value: true\n}));\nexports.login = login;\nfunction login() {\n  if (document.getElementById(\"btnContainer\")) return;\n  const btnAutoPrint = document.getElementById(\"btnPrintAWSAuto\");\n  if (btnAutoPrint) btnAutoPrint.remove();\n  const USER_KEY = \"workAdminUser\";\n  let modal; // Button Data\n  const buttonsData = [{\n    text: \"\\u{1F9D1}\\u200D\\u{1F4BC}\",\n    onclick: handleAccountClick\n  }, {\n    text: \"\\u270E\",\n    onclick: handleEditClick\n  }]; // Create Buttons Container\n  const btnContainer = document.createElement(\"div\");\n  btnContainer.id = \"btnContainer\";\n  btnContainer.style.position = \"fixed\";\n  btnContainer.style.zIndex = \"9999\";\n  btnContainer.style.display = \"flex\";\n  btnContainer.style.gap = \"5px\";\n  btnContainer.style.right = \"20px\";\n  btnContainer.style.bottom = \"20px\";\n  buttonsData.forEach(({\n    text,\n    onclick\n  }) => {\n    const button = document.createElement(\"button\");\n    button.textContent = text;\n    button.style.backgroundColor = \"#fff\";\n    button.style.color = \"#3C3C3C\";\n    button.style.width = \"40px\";\n    button.style.height = \"40px\";\n    button.style.fontSize = \"20px\";\n    button.style.borderRadius = \"5px\";\n    button.style.border = \"1px solid #555\";\n    button.style.cursor = \"pointer\";\n    button.addEventListener(\"click\", onclick);\n    button.addEventListener(\"mouseover\", () => {\n      button.style.boxShadow = \"0 0 5px #B9BDBA\";\n    });\n    button.addEventListener(\"mouseout\", () => {\n      button.style.boxShadow = \"none\";\n      button.style.backgroundColor = \"#fff\";\n      button.style.color = \"#3C3C3C\";\n    });\n    btnContainer.appendChild(button);\n  });\n  document.body.appendChild(btnContainer); // --------------------------\n  // Button Handlers\n  // --------------------------\n  function handleAccountClick() {\n    const user = getFromLocalStorage(USER_KEY);\n    if (!user) {\n      alert(\"No user found.\");\n      return;\n    }\n    autoFillLogin(user);\n  }\n  function handleEditClick() {\n    const user = getFromLocalStorage(USER_KEY);\n    if (user) {\n      openModal(renderUserActions());\n    } else {\n      openModal(renderUserForm());\n    }\n  } // --------------------------\n  // Local Storage Helpers\n  // --------------------------\n  function getFromLocalStorage(key, defaultValue = null) {\n    try {\n      const value = localStorage.getItem(key);\n      return value ? JSON.parse(value) : defaultValue;\n    } catch (error) {\n      console.error(\"Error getting from localStorage\", error);\n      return defaultValue;\n    }\n  }\n  function setUser(user) {\n    localStorage.setItem(USER_KEY, JSON.stringify(user));\n  }\n  function removeUser() {\n    localStorage.removeItem(USER_KEY);\n  } // --------------------------\n  // Modal Helpers\n  // --------------------------\n  function openModal(content) {\n    closeModal();\n    modal = document.createElement(\"div\");\n    modal.style.position = \"fixed\";\n    modal.style.inset = \"0\";\n    modal.style.background = \"rgba(0,0,0,0.6)\";\n    modal.style.display = \"flex\";\n    modal.style.alignItems = \"center\";\n    modal.style.justifyContent = \"center\";\n    modal.style.zIndex = \"9999\";\n    const box = document.createElement(\"div\");\n    box.style.background = \"#2B2B2B\";\n    box.style.padding = \"20px\";\n    box.style.borderRadius = \"8px\";\n    box.style.minWidth = \"300px\";\n    box.style.color = \"#fff\";\n    box.appendChild(content);\n    modal.appendChild(box);\n    document.body.appendChild(modal);\n  }\n  function closeModal() {\n    if (modal) modal.remove();\n    modal = null;\n  } // --------------------------\n  // Render User Actions\n  // --------------------------\n  function renderUserActions() {\n    const wrapper = document.createElement(\"div\");\n    const info = document.createElement(\"p\");\n    info.textContent = \"User already exists\";\n    info.style.marginBottom = \"15px\";\n    const deleteBtn = document.createElement(\"button\");\n    deleteBtn.textContent = \"Delete user\";\n    deleteBtn.onclick = () => {\n      removeUser();\n      closeModal();\n    };\n    const closeBtn = document.createElement(\"button\");\n    closeBtn.textContent = \"Close\";\n    closeBtn.style.marginLeft = \"10px\";\n    closeBtn.onclick = closeModal;\n    wrapper.append(info, deleteBtn, closeBtn);\n    return wrapper;\n  } // --------------------------\n  // Render User Form\n  // --------------------------\n  function renderUserForm() {\n    const wrapper = document.createElement(\"div\");\n    wrapper.style.padding = \"30px\";\n    const barcode = document.createElement(\"input\");\n    barcode.placeholder = \"Barcode\";\n    const workplace = document.createElement(\"input\");\n    workplace.placeholder = \"Workplace\";\n    [barcode, workplace].forEach(i => {\n      i.style.display = \"block\";\n      i.style.width = \"100%\";\n      i.style.marginBottom = \"10px\";\n      i.style.padding = \"8px\";\n    });\n    const addBtn = document.createElement(\"button\");\n    addBtn.textContent = \"Add user\";\n    addBtn.onclick = () => {\n      const barcodeValue = barcode.value.trim();\n      const workplaceValue = workplace.value.trim();\n      if (!barcodeValue || !workplaceValue) return;\n      setUser({\n        barcode: barcodeValue,\n        workplace: workplaceValue\n      });\n      closeModal();\n    };\n    const closeBtn = document.createElement(\"button\");\n    closeBtn.textContent = \"Close\";\n    closeBtn.style.marginLeft = \"10px\";\n    closeBtn.onclick = closeModal;\n    wrapper.append(barcode, workplace, addBtn, closeBtn);\n    return wrapper;\n  } // --------------------------\n  // Auto-fill login\n  // --------------------------\n  function autoFillLogin(user) {\n    const barcodeInput = document.querySelector('input[name=\"barcode\"]');\n    const workplaceInput = document.querySelector('input[name=\"workplace\"]');\n    const submitButton = document.querySelector(\"button.btn--fluid[type='submit']\");\n    if (!barcodeInput || !workplaceInput || !submitButton) {\n      console.warn(\"Inputs or submit button not found\");\n      return;\n    }\n    barcodeInput.value = user.barcode;\n    barcodeInput.dispatchEvent(new Event(\"input\", {\n      bubbles: true\n    }));\n    workplaceInput.value = user.workplace;\n    workplaceInput.dispatchEvent(new Event(\"input\", {\n      bubbles: true\n    }));\n    submitButton.click();\n  }\n}\n\n//# sourceURL=webpack://autodoc-helper/./src/modules/login.js?\n}");
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.login = login;
+function login() {
+  if (document.getElementById("btnContainer")) return;
+  const btnAutoPrint = document.getElementById("btnPrintAWSAuto");
+  if (btnAutoPrint) btnAutoPrint.remove();
+  const USER_KEY = "workAdminUser";
+  let modal; // Button Data
+  const buttonsData = [{
+    text: "\u{1F9D1}\u200D\u{1F4BC}",
+    onclick: handleAccountClick
+  }, {
+    text: "\u270E",
+    onclick: handleEditClick
+  }]; // Create Buttons Container
+  const btnContainer = document.createElement("div");
+  btnContainer.id = "btnContainer";
+  btnContainer.style.position = "fixed";
+  btnContainer.style.zIndex = "9999";
+  btnContainer.style.display = "flex";
+  btnContainer.style.gap = "5px";
+  btnContainer.style.right = "20px";
+  btnContainer.style.bottom = "20px";
+  buttonsData.forEach(({
+    text,
+    onclick
+  }) => {
+    const button = document.createElement("button");
+    button.textContent = text;
+    button.style.backgroundColor = "#fff";
+    button.style.color = "#3C3C3C";
+    button.style.width = "40px";
+    button.style.height = "40px";
+    button.style.fontSize = "20px";
+    button.style.borderRadius = "5px";
+    button.style.border = "1px solid #555";
+    button.style.cursor = "pointer";
+    button.addEventListener("click", onclick);
+    button.addEventListener("mouseover", () => {
+      button.style.boxShadow = "0 0 5px #B9BDBA";
+    });
+    button.addEventListener("mouseout", () => {
+      button.style.boxShadow = "none";
+      button.style.backgroundColor = "#fff";
+      button.style.color = "#3C3C3C";
+    });
+    btnContainer.appendChild(button);
+  });
+  document.body.appendChild(btnContainer); // --------------------------
+  // Button Handlers
+  // --------------------------
+  function handleAccountClick() {
+    const user = getFromLocalStorage(USER_KEY);
+    if (!user) {
+      alert("No user found.");
+      return;
+    }
+    autoFillLogin(user);
+  }
+  function handleEditClick() {
+    const user = getFromLocalStorage(USER_KEY);
+    if (user) {
+      openModal(renderUserActions());
+    } else {
+      openModal(renderUserForm());
+    }
+  } // --------------------------
+  // Local Storage Helpers
+  // --------------------------
+  function getFromLocalStorage(key, defaultValue = null) {
+    try {
+      const value = localStorage.getItem(key);
+      return value ? JSON.parse(value) : defaultValue;
+    } catch (error) {
+      console.error("Error getting from localStorage", error);
+      return defaultValue;
+    }
+  }
+  function setUser(user) {
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+  }
+  function removeUser() {
+    localStorage.removeItem(USER_KEY);
+  } // --------------------------
+  // Modal Helpers
+  // --------------------------
+  function openModal(content) {
+    closeModal();
+    modal = document.createElement("div");
+    modal.style.position = "fixed";
+    modal.style.inset = "0";
+    modal.style.background = "rgba(0,0,0,0.6)";
+    modal.style.display = "flex";
+    modal.style.alignItems = "center";
+    modal.style.justifyContent = "center";
+    modal.style.zIndex = "9999";
+    const box = document.createElement("div");
+    box.style.background = "#2B2B2B";
+    box.style.padding = "20px";
+    box.style.borderRadius = "8px";
+    box.style.minWidth = "300px";
+    box.style.color = "#fff";
+    box.appendChild(content);
+    modal.appendChild(box);
+    document.body.appendChild(modal);
+  }
+  function closeModal() {
+    if (modal) modal.remove();
+    modal = null;
+  } // --------------------------
+  // Render User Actions
+  // --------------------------
+  function renderUserActions() {
+    const wrapper = document.createElement("div");
+    const info = document.createElement("p");
+    info.textContent = "User already exists";
+    info.style.marginBottom = "15px";
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Delete user";
+    deleteBtn.onclick = () => {
+      removeUser();
+      closeModal();
+    };
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "Close";
+    closeBtn.style.marginLeft = "10px";
+    closeBtn.onclick = closeModal;
+    wrapper.append(info, deleteBtn, closeBtn);
+    return wrapper;
+  } // --------------------------
+  // Render User Form
+  // --------------------------
+  function renderUserForm() {
+    const wrapper = document.createElement("div");
+    wrapper.style.padding = "30px";
+    const barcode = document.createElement("input");
+    barcode.placeholder = "Barcode";
+    const workplace = document.createElement("input");
+    workplace.placeholder = "Workplace";
+    [barcode, workplace].forEach(i => {
+      i.style.display = "block";
+      i.style.width = "100%";
+      i.style.marginBottom = "10px";
+      i.style.padding = "8px";
+    });
+    const addBtn = document.createElement("button");
+    addBtn.textContent = "Add user";
+    addBtn.onclick = () => {
+      const barcodeValue = barcode.value.trim();
+      const workplaceValue = workplace.value.trim();
+      if (!barcodeValue || !workplaceValue) return;
+      setUser({
+        barcode: barcodeValue,
+        workplace: workplaceValue
+      });
+      closeModal();
+    };
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "Close";
+    closeBtn.style.marginLeft = "10px";
+    closeBtn.onclick = closeModal;
+    wrapper.append(barcode, workplace, addBtn, closeBtn);
+    return wrapper;
+  } // --------------------------
+  // Auto-fill login
+  // --------------------------
+  function autoFillLogin(user) {
+    const barcodeInput = document.querySelector('input[name="barcode"]');
+    const workplaceInput = document.querySelector('input[name="workplace"]');
+    const submitButton = document.querySelector("button.btn--fluid[type='submit']");
+    if (!barcodeInput || !workplaceInput || !submitButton) {
+      console.warn("Inputs or submit button not found");
+      return;
+    }
+    barcodeInput.value = user.barcode;
+    barcodeInput.dispatchEvent(new Event("input", {
+      bubbles: true
+    }));
+    workplaceInput.value = user.workplace;
+    workplaceInput.dispatchEvent(new Event("input", {
+      bubbles: true
+    }));
+    submitButton.click();
+  }
+}
 
 /***/ },
 
@@ -60,7 +430,113 @@ eval("{\n\nObject.defineProperty(exports, \"__esModule\", ({\n  value: true\n}))
   \*********************************/
 (__unused_webpack_module, exports) {
 
-eval("{\n\nObject.defineProperty(exports, \"__esModule\", ({\n  value: true\n}));\nexports.printAWS = printAWS;\nfunction printAWS() {\n  if (document.getElementById(\"btnPrintAWSAuto\")) return;\n  const loginContainer = document.getElementById(\"btnContainer\");\n  if (loginContainer) loginContainer.remove();\n  // Створюємо кнопку\n  const btnPrint = document.createElement(\"button\");\n  btnPrint.textContent = \"\\u{1F5A8}\";\n  btnPrint.id = \"btnPrintAWSAuto\";\n  document.body.appendChild(btnPrint);\n  btnPrint.style.position = \"fixed\";\n  btnPrint.style.bottom = \"28px\";\n  btnPrint.style.left = \"480px\";\n  btnPrint.style.fontSize = \"24px\";\n  btnPrint.style.textDecoration = \"none\";\n  btnPrint.style.cursor = \"pointer\";\n  btnPrint.style.zIndex = \"1000\";\n  btnPrint.style.display = \"block\";\n  btnPrint.style.width = \"30px\";\n  btnPrint.style.height = \"30px\";\n  btnPrint.style.textAlign = \"center\";\n  btnPrint.style.border = \"1px solid #b9bdba\";\n  btnPrint.style.borderRadius = \"4px\";\n  btnPrint.style.backgroundColor = \"#fff\";\n  btnPrint.style.color = \"#3c3c3c\";\n  btnPrint.style.lineHeight = \"32px\";\n  btnPrint.addEventListener(\"mouseover\", () => {\n    btnPrint.style.boxShadow = \"0 0 5px #b9bdba\";\n  });\n  btnPrint.addEventListener(\"mouseout\", () => {\n    btnPrint.style.boxShadow = \"none\";\n  });\n  let clickTimer = null;\n  btnPrint.addEventListener(\"click\", e => {\n    //e.preventDefault(); // щоб не переходити по href\n    clickTimer = setTimeout(() => {\n      const printTRF = document.querySelectorAll(\".aside-info__item span\");\n      if (!printTRF.length) {\n        console.error(\"Не знайдено TRF елемент!\");\n        return;\n      }\n      //console.log(printTRF[2].textContent)\n      const numberTRF = printTRF[2].textContent.replace(/\\D/g, \"\");\n      //console.log(numberTRF)\n      if (!numberTRF) {\n        console.error(\"Не вдалося отримати номер TRF!\");\n        return;\n      }\n      const url = `https://aws.autodoc.de/store/transfer/list-pdf/${numberTRF}/list?palletsCount=1`;\n      window.open(url, \"_blank\");\n    }, 250);\n  });\n  // dblclick\n  btnPrint.addEventListener(\"dblclick\", () => {\n    clearTimeout(clickTimer);\n    const printTRF = document.querySelectorAll(\".aside-info__item span\");\n    if (!printTRF.length) {\n      console.error(\"Не знайдено TRF елемент!\");\n      return;\n    }\n    //console.log(printTRF[2].textContent)\n    const numberTRF = printTRF[2].textContent.replace(/\\D/g, \"\");\n    //console.log(numberTRF)\n    if (!numberTRF) {\n      console.error(\"Не вдалося отримати номер TRF!\");\n      return;\n    }\n    const url = `https://aws.autodoc.de/store/transfer/list-pdf/${numberTRF}/list?palletsCount=2`;\n    window.open(url, \"_blank\");\n  });\n  // auto pritn window\n  if (observer) return;\n  observer = new MutationObserver(() => {\n    const desc = document.querySelector(\".modal-action__desc\");\n    if (!desc) return;\n    if (!desc.textContent.includes(\"Transfer is packed\")) return;\n    const modal = desc.closest(\".modal\");\n    if (!modal) return;\n    if (modal.dataset.handled) return;\n    modal.dataset.handled = \"true\";\n    modal.querySelector(\".btn-round--close\")?.click();\n    const printTRF = document.querySelectorAll(\".aside-info__item span\");\n    if (!printTRF) {\n      console.error(\"Не знайдено TRF елемент!\");\n      return;\n    }\n    //console.log(printTRF[2].textContent)\n    const numberTRF = printTRF[2].textContent.replace(/\\D/g, \"\");\n    //console.log(numberTRF)\n    if (!numberTRF) {\n      console.error(\"Не вдалося отримати номер TRF!\");\n      return;\n    }\n    const url = `https://aws.autodoc.de/store/transfer/list-pdf/${numberTRF}/list?palletsCount=1`;\n    window.open(url, \"_blank\");\n  });\n  observer.observe(document.body, {\n    childList: true,\n    subtree: true\n  });\n}\n\n//# sourceURL=webpack://autodoc-helper/./src/modules/printAWS.js?\n}");
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.printAWS = printAWS;
+function printAWS() {
+  let observer = null;
+  if (document.getElementById("btnPrintAWSAuto")) return;
+  const loginContainer = document.getElementById("btnContainer");
+  if (loginContainer) loginContainer.remove();
+  // Створюємо кнопку
+  const btnPrint = document.createElement("button");
+  btnPrint.textContent = "\u{1F5A8}";
+  btnPrint.id = "btnPrintAWSAuto";
+  document.body.appendChild(btnPrint);
+  btnPrint.style.position = "fixed";
+  btnPrint.style.bottom = "28px";
+  btnPrint.style.left = "480px";
+  btnPrint.style.fontSize = "24px";
+  btnPrint.style.textDecoration = "none";
+  btnPrint.style.cursor = "pointer";
+  btnPrint.style.zIndex = "1000";
+  btnPrint.style.display = "block";
+  btnPrint.style.width = "30px";
+  btnPrint.style.height = "30px";
+  btnPrint.style.textAlign = "center";
+  btnPrint.style.border = "1px solid #b9bdba";
+  btnPrint.style.borderRadius = "4px";
+  btnPrint.style.backgroundColor = "#fff";
+  btnPrint.style.color = "#3c3c3c";
+  btnPrint.style.lineHeight = "32px";
+  btnPrint.addEventListener("mouseover", () => {
+    btnPrint.style.boxShadow = "0 0 5px #b9bdba";
+  });
+  btnPrint.addEventListener("mouseout", () => {
+    btnPrint.style.boxShadow = "none";
+  });
+  let clickTimer = null;
+  btnPrint.addEventListener("click", e => {
+    //e.preventDefault(); // щоб не переходити по href
+    clickTimer = setTimeout(() => {
+      const printTRF = document.querySelectorAll(".aside-info__item span");
+      if (!printTRF.length) {
+        console.error("Не знайдено TRF елемент!");
+        return;
+      }
+      //console.log(printTRF[2].textContent)
+      const numberTRF = printTRF[2].textContent.replace(/\D/g, "");
+      //console.log(numberTRF)
+      if (!numberTRF) {
+        console.error("Не вдалося отримати номер TRF!");
+        return;
+      }
+      const url = `https://aws.autodoc.de/store/transfer/list-pdf/${numberTRF}/list?palletsCount=1`;
+      window.open(url, "_blank");
+    }, 250);
+  });
+  // dblclick
+  btnPrint.addEventListener("dblclick", () => {
+    clearTimeout(clickTimer);
+    const printTRF = document.querySelectorAll(".aside-info__item span");
+    if (!printTRF.length) {
+      console.error("Не знайдено TRF елемент!");
+      return;
+    }
+    //console.log(printTRF[2].textContent)
+    const numberTRF = printTRF[2].textContent.replace(/\D/g, "");
+    //console.log(numberTRF)
+    if (!numberTRF) {
+      console.error("Не вдалося отримати номер TRF!");
+      return;
+    }
+    const url = `https://aws.autodoc.de/store/transfer/list-pdf/${numberTRF}/list?palletsCount=2`;
+    window.open(url, "_blank");
+  });
+  // auto pritn window
+  if (observer) return;
+  observer = new MutationObserver(() => {
+    const desc = document.querySelector(".modal-action__desc");
+    if (!desc) return;
+    if (!desc.textContent.includes("Transfer is packed")) return;
+    const modal = desc.closest(".modal");
+    if (!modal) return;
+    if (modal.dataset.handled) return;
+    modal.dataset.handled = "true";
+    modal.querySelector(".btn-round--close")?.click();
+    const printTRF = document.querySelectorAll(".aside-info__item span");
+    if (!printTRF) {
+      console.error("Не знайдено TRF елемент!");
+      return;
+    }
+    //console.log(printTRF[2].textContent)
+    const numberTRF = printTRF[2].textContent.replace(/\D/g, "");
+    //console.log(numberTRF)
+    if (!numberTRF) {
+      console.error("Не вдалося отримати номер TRF!");
+      return;
+    }
+    const url = `https://aws.autodoc.de/store/transfer/list-pdf/${numberTRF}/list?palletsCount=1`;
+    window.open(url, "_blank");
+  });
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+}
 
 /***/ },
 
@@ -70,7 +546,106 @@ eval("{\n\nObject.defineProperty(exports, \"__esModule\", ({\n  value: true\n}))
   \*********************************/
 (__unused_webpack_module, exports) {
 
-eval("{\n\nObject.defineProperty(exports, \"__esModule\", ({\n  value: true\n}));\nexports.printTWO = printTWO;\nfunction printTWO() {\n  const btn = document.createElement(\"button\");\n  btn.textContent = \"Print TWO\";\n  btn.id = \"btnPrintTWO\";\n  btn.style.position = \"fixed\";\n  btn.style.bottom = \"32px\";\n  btn.style.left = \"390px\";\n  btn.style.zIndex = \"9999\";\n  btn.style.padding = \"3px\";\n  btn.style.backgroundColor = \"#4CAF50\";\n  btn.style.color = \"white\";\n  btn.style.border = \"none\";\n  btn.style.borderRadius = \"5px\";\n  btn.style.cursor = \"pointer\";\n  document.body.appendChild(btn);\n  btn.addEventListener(\"click\", async () => {\n    const isTwoOrder = document.querySelector(\".aside-info__item span\")?.textContent?.trim()?.slice(0, 3)?.toLowerCase() === \"two\";\n    if (!isTwoOrder) {\n      //alert(\"This is not a TWO order!\");\n      //return;\n    }\n    btn.disabled = true; // щоб не клікали 10 разів\n    btn.textContent = \"Processing...\";\n    await processTable();\n    btn.textContent = \"Done ✅\";\n    btn.disabled = false;\n  });\n  function getColumnIndexes() {\n    const headers = Array.from(document.querySelectorAll(\"table thead th\"));\n    const indexes = {};\n    headers.forEach((th, index) => {\n      const text = th.textContent.trim().toLowerCase();\n      if (text.includes(\"article no\")) indexes.article = index;\n      if (text === \"qty\") indexes.qty = index;\n      if (text.includes(\"packed qty\")) indexes.packed = index;\n    });\n    return indexes;\n  }\n  async function processTable() {\n    let safetyCounter = 0;\n    while (safetyCounter++ < 1000) {\n      console.log(safetyCounter);\n      const indexes = getColumnIndexes();\n      const rows = Array.from(document.querySelectorAll(\"table tbody tr\"));\n      console.log(rows);\n      const rowToProcess = rows.find(row => {\n        const cells = row.children;\n        const qty = parseInt(cells[indexes.qty].textContent.trim());\n        const packed = parseInt(cells[indexes.packed].textContent.trim());\n        return qty !== packed;\n      });\n      if (!rowToProcess) continue;\n      console.log(rowToProcess);\n      const articleNo = rowToProcess.children[indexes.article].textContent.trim();\n      const packedBefore = parseInt(rowToProcess.children[indexes.packed].textContent.trim());\n      await processArticle(articleNo);\n      await waitForRowUpdate(articleNo, packedBefore);\n      //await waitForDomUpdate();\n    }\n    console.log(\"Все оброблено ✅\");\n  }\n  async function processArticle(articleNo) {\n    const input = document.querySelector(\".input__field\");\n    const button = document.querySelector(\"button.btn-round[type='submit']\");\n    if (!input || !button) {\n      alert(\"Input field or button not found! Please check the selectors.\");\n      btn.textContent = \"Print TWO\";\n      btn.disabled = false;\n      console.error(\"Не знайдено поле вводу або кнопку!\");\n      return;\n    }\n    input.value = articleNo;\n    input.dispatchEvent(new Event(\"input\", {\n      bubbles: true\n    }));\n    button.click();\n    console.log(\"Обробляємо:\", articleNo);\n  }\n  async function waitForRowUpdate(articleNo, prevPacked) {\n    return new Promise(resolve => {\n      const interval = setInterval(() => {\n        const indexes = getColumnIndexes();\n        const rows = Array.from(document.querySelectorAll(\"table tbody tr\"));\n        const row = rows.find(r => r.children[indexes.article].textContent.trim() === articleNo);\n        if (!row) return;\n        const newPacked = parseInt(row.children[indexes.packed].textContent.trim());\n        if (newPacked !== prevPacked) {\n          clearInterval(interval);\n          resolve();\n        }\n      }, 200);\n    });\n  }\n}\n\n//# sourceURL=webpack://autodoc-helper/./src/modules/printTWO.js?\n}");
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.printTWO = printTWO;
+function printTWO() {
+  const btn = document.createElement("button");
+  btn.textContent = "Print TWO";
+  btn.id = "btnPrintTWO";
+  btn.style.position = "fixed";
+  btn.style.bottom = "32px";
+  btn.style.left = "390px";
+  btn.style.zIndex = "9999";
+  btn.style.padding = "3px";
+  btn.style.backgroundColor = "#4CAF50";
+  btn.style.color = "white";
+  btn.style.border = "none";
+  btn.style.borderRadius = "5px";
+  btn.style.cursor = "pointer";
+  document.body.appendChild(btn);
+  btn.addEventListener("click", async () => {
+    const isTwoOrder = document.querySelector(".aside-info__item span")?.textContent?.trim()?.slice(0, 3)?.toLowerCase() === "two";
+    if (!isTwoOrder) {
+      //alert("This is not a TWO order!");
+      //return;
+    }
+    btn.disabled = true; // щоб не клікали 10 разів
+    btn.textContent = "Processing...";
+    await processTable();
+    btn.textContent = "Done ✅";
+    btn.disabled = false;
+  });
+  function getColumnIndexes() {
+    const headers = Array.from(document.querySelectorAll("table thead th"));
+    const indexes = {};
+    headers.forEach((th, index) => {
+      const text = th.textContent.trim().toLowerCase();
+      if (text.includes("article no")) indexes.article = index;
+      if (text === "qty") indexes.qty = index;
+      if (text.includes("packed qty")) indexes.packed = index;
+    });
+    return indexes;
+  }
+  async function processTable() {
+    let safetyCounter = 0;
+    while (safetyCounter++ < 1000) {
+      console.log(safetyCounter);
+      const indexes = getColumnIndexes();
+      const rows = Array.from(document.querySelectorAll("table tbody tr"));
+      console.log(rows);
+      const rowToProcess = rows.find(row => {
+        const cells = row.children;
+        const qty = parseInt(cells[indexes.qty].textContent.trim());
+        const packed = parseInt(cells[indexes.packed].textContent.trim());
+        return qty !== packed;
+      });
+      if (!rowToProcess) continue;
+      console.log(rowToProcess);
+      const articleNo = rowToProcess.children[indexes.article].textContent.trim();
+      const packedBefore = parseInt(rowToProcess.children[indexes.packed].textContent.trim());
+      await processArticle(articleNo);
+      await waitForRowUpdate(articleNo, packedBefore);
+      //await waitForDomUpdate();
+    }
+    console.log("Все оброблено ✅");
+  }
+  async function processArticle(articleNo) {
+    const input = document.querySelector(".input__field");
+    const button = document.querySelector("button.btn-round[type='submit']");
+    if (!input || !button) {
+      alert("Input field or button not found! Please check the selectors.");
+      btn.textContent = "Print TWO";
+      btn.disabled = false;
+      console.error("Не знайдено поле вводу або кнопку!");
+      return;
+    }
+    input.value = articleNo;
+    input.dispatchEvent(new Event("input", {
+      bubbles: true
+    }));
+    button.click();
+    console.log("Обробляємо:", articleNo);
+  }
+  async function waitForRowUpdate(articleNo, prevPacked) {
+    return new Promise(resolve => {
+      const interval = setInterval(() => {
+        const indexes = getColumnIndexes();
+        const rows = Array.from(document.querySelectorAll("table tbody tr"));
+        const row = rows.find(r => r.children[indexes.article].textContent.trim() === articleNo);
+        if (!row) return;
+        const newPacked = parseInt(row.children[indexes.packed].textContent.trim());
+        if (newPacked !== prevPacked) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 200);
+    });
+  }
+}
 
 /***/ }
 
@@ -107,11 +682,74 @@ eval("{\n\nObject.defineProperty(exports, \"__esModule\", ({\n  value: true\n}))
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module can't be inlined because the eval devtool is used.
-/******/ 	var __webpack_exports__ = __webpack_require__("./src/index.js");
-/******/ 	
+var __webpack_exports__ = {};
+// This entry needs to be wrapped in an IIFE because it needs to be isolated against other modules in the chunk.
+(() => {
+/*!**********************!*\
+  !*** ./src/index.js ***!
+  \**********************/
+
+
+var _login = __webpack_require__(/*! ./modules/login.js */ "./src/modules/login.js");
+var _printAWS = __webpack_require__(/*! ./modules/printAWS.js */ "./src/modules/printAWS.js");
+var _printTWO = __webpack_require__(/*! ./modules/printTWO.js */ "./src/modules/printTWO.js");
+var _filterTable = __webpack_require__(/*! ./modules/filterTable.js */ "./src/modules/filterTable.js");
+(function () {
+  "use strict";
+
+  const routes = [{
+    // match: /^\/login/,
+    match: /\/login/,
+    action: _login.login,
+    cleanup: () => {
+      document.getElementById("btnPrintAWSAuto")?.remove();
+    }
+  }, {
+    // match: /^\/packing-transfer/,
+    match: /\/packing-transfer/,
+    action: () => {
+      (0, _printAWS.printAWS)();
+      (0, _printTWO.printTWO)();
+      (0, _filterTable.filterTable)();
+    },
+    cleanup: () => {
+      document.getElementById("btnContainer")?.remove();
+      document.getElementById("btnPrintTWO")?.remove();
+    }
+  }];
+  let currentRoute = null;
+  function router() {
+    const path = location.pathname;
+    console.log("Router called, path:", path);
+    if (currentRoute?.cleanup) {
+      currentRoute.cleanup();
+    }
+    for (const r of routes) {
+      if (r.match.test(path)) {
+        console.log("Route matched:", r);
+        currentRoute = r;
+        r.action();
+        return;
+      }
+    }
+    console.log("No route matched");
+  }
+
+  // --- SPA navigation hook ---
+  const push = history.pushState;
+  history.pushState = function () {
+    push.apply(this, arguments);
+    router();
+  };
+  const replace = history.replaceState;
+  history.replaceState = function () {
+    replace.apply(this, arguments);
+    router();
+  };
+  window.addEventListener("popstate", router);
+  router();
+})();
+})();
+
 /******/ })()
 ;

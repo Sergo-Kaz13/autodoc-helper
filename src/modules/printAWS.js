@@ -1,4 +1,5 @@
 export function printAWS() {
+  let observer = null;
   if (document.getElementById("btnPrintAWSAuto")) return;
   const loginContainer = document.getElementById("btnContainer");
   if (loginContainer) loginContainer.remove();

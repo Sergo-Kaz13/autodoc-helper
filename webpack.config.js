@@ -5,6 +5,7 @@ const banner = fs.readFileSync("./scripts/banner.js", "utf-8");
 
 module.exports = {
   mode: "development",
+  devtool: false,
   entry: "./src/index.js",
   experiments: {
     outputModule: false,
