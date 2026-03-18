@@ -58,5 +58,9 @@ import { filterTable } from "./modules/filterTable.js";
     router();
   };
   window.addEventListener("popstate", router);
-  router();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", router);
+  } else {
+    router();
+  }
 })();
