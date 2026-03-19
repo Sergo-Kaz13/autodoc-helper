@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Warehouse Helper
 // @namespace    https://github.com/Sergo-Kaz13/autodoc-helper
-// @version      1.0.0
+// @version      1.0.1
 // @description  Automates warehouse workflow on m13.autodoc.de: auto-login, AWS/TWO printing and table filtering
 // @author       Sergo_Kaz
 // @match        http://127.0.0.1:5500/*
@@ -21,10 +21,14 @@
 /*!************************************!*\
   !*** ./src/modules/filterTable.js ***!
   \************************************/
-() {
+(__unused_webpack_module, exports) {
 
 
 
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.filterTable = filterTable;
 function filterTable() {
   if (document.getElementById("searchBlock")) return;
   let searchType = "Article No"; // Default search type
