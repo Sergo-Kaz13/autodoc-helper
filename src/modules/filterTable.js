@@ -1,4 +1,4 @@
-function filterTable() {
+export function filterTable() {
   if (document.getElementById("searchBlock")) return;
   let searchType = "Article No"; // Default search type
 
