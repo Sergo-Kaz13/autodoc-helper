@@ -32,73 +32,67 @@ exports.filterTable = filterTable;
 function filterTable() {
   if (document.getElementById("searchBlock")) return;
   let searchType = "Article No"; // Default search type
-
+  // Get table reference
   function init(table) {
-    // Get table reference
-    // let table = document.querySelector("table");
-    function initialTfoot() {
-      const existing = table.querySelector("tfoot");
-      if (existing) existing.remove();
-      const tfoot = document.createElement("tfoot");
-      const tfootRow = document.createElement("tr");
-      const tfootCell1 = document.createElement("td");
-      tfootRow.appendChild(tfootCell1);
-      const tfootCell2 = document.createElement("td");
-      tfootRow.appendChild(tfootCell2);
-      const tfootCell3 = document.createElement("td");
-      tfootRow.appendChild(tfootCell3);
-      const tfootCell4 = document.createElement("td");
-      tfootRow.appendChild(tfootCell4);
-      const tfootCell5 = document.createElement("td");
-      tfootCell5.id = "totalQty";
-      tfootCell5.style.color = "red";
-      tfootCell5.style.fontWeight = "bold";
-      tfootCell5.style.backgroundColor = "white";
-      tfootCell5.textContent = "0";
-      tfootRow.appendChild(tfootCell5);
-      const tfootCell6 = document.createElement("td");
-      tfootCell6.id = "totalPackedQty";
-      tfootCell6.style.color = "red";
-      tfootCell6.style.fontWeight = "bold";
-      tfootCell6.style.backgroundColor = "white";
-      tfootCell6.textContent = "0";
-      tfootRow.appendChild(tfootCell6);
-      const tfootCell7 = document.createElement("td");
-      tfootRow.appendChild(tfootCell7);
-      const tfootCell8 = document.createElement("td");
-      tfootRow.appendChild(tfootCell8);
-      const tfootCell9 = document.createElement("td");
-      tfootRow.appendChild(tfootCell9);
-      tfoot.appendChild(tfootRow);
-      const thead = table.querySelector("thead");
-      if (thead) {
-        table.insertBefore(tfoot, thead.nextSibling);
-      } else {
-        table.prepend(tfoot);
+    function createTfoot(table) {
+      const colCount = table.querySelector("thead tr")?.cells.length ?? 0;
+      if (!colCount) return; // таблиця без thead — виходимо
+      const headers = Array.from(table.querySelectorAll("thead th"));
+      const qtyIndex = headers.findIndex(th => th.textContent.trim().toLowerCase() === "qty");
+      const packedIndex = headers.findIndex(th => th.textContent.trim().toLowerCase() === "packed qty");
+      const hasQty = qtyIndex !== -1;
+      const hasPacked = packedIndex !== -1;
+      if (!hasQty && !hasPacked) return;
+      // const tfood = document.createElement("tfoot");
+      const tfoodRow = document.createElement("tr");
+      tfoodRow.classList.add("summary-row");
+      for (let i = 0; i < colCount; i++) {
+        const td = document.createElement("td");
+        if (i === qtyIndex) {
+          td.id = "totalQty";
+          td.style.color = "white";
+          td.style.fontWeight = "bold";
+          //td.style.backgroundColor = "white";
+          td.textContent = "0";
+        } else if (i === packedIndex) {
+          td.id = "totalPackedQty";
+          td.style.color = "white";
+          td.style.fontWeight = "bold";
+          //td.style.backgroundColor = "white";
+          td.textContent = "0";
+        }
+        tfoodRow.appendChild(td);
       }
-      // table.appendChild(tfoot);
+      // tfood.appendChild(tfoodRow);
+      const tbody = table.querySelector("tbody");
+      if (tbody) tbody.prepend(tfoodRow);
+      // table.appendChild(tfood);
     }
+    if (table) createTfoot(table);
+
     // Function to calculate totals
     function calculateTotals() {
       const totalQtyEl = document.getElementById("totalQty");
       const totalPackedQtyEl = document.getElementById("totalPackedQty");
       if (!totalQtyEl || !totalPackedQtyEl) return;
+      const headers = Array.from(table.querySelectorAll("thead th"));
+      const qtyIndex = headers.findIndex(th => th.textContent.trim().toLowerCase() === "qty");
+      const packedIndex = headers.findIndex(th => th.textContent.trim().toLowerCase() === "packed qty");
       const rows = table.querySelectorAll("tbody tr");
       let totalQty = 0;
       let totalPackedQty = 0;
       rows.forEach(row => {
+        if (row.classList.contains("summary-row")) return;
         if (row.style.display !== "none") {
-          const qtyCell = row.cells[4];
-          const packedQtyCell = row.cells[5];
-          totalQty += parseInt(qtyCell.textContent) || 0;
-          totalPackedQty += parseInt(packedQtyCell.textContent) || 0;
+          totalQty += parseInt(row.cells[qtyIndex]?.textContent) || 0;
+          totalPackedQty += parseInt(row.cells[packedIndex]?.textContent) || 0;
         }
       });
       totalQtyEl.textContent = totalQty;
       totalPackedQtyEl.textContent = totalPackedQty;
     }
-    initialTfoot();
     calculateTotals();
+
     // Create search block
     const searchBlock = document.createElement("div");
     searchBlock.style.position = "fixed";
@@ -150,6 +144,7 @@ function filterTable() {
     radio1.type = "radio";
     radio1.name = "searchType";
     radio1.value = "Article No";
+    radio1.setAttribute("style", "appearance: radio !important;");
     radio1.id = "articleNo";
     radio1.checked = true;
     const label1 = document.createElement("label");
@@ -161,6 +156,7 @@ function filterTable() {
     radio2.type = "radio";
     radio2.name = "searchType";
     radio2.value = "Brand";
+    radio2.setAttribute("style", "appearance: radio !important;");
     radio2.id = "brand";
     const label2 = document.createElement("label");
     label2.htmlFor = "brand";
@@ -171,6 +167,7 @@ function filterTable() {
     radio3.type = "radio";
     radio3.name = "searchType";
     radio3.value = "Category";
+    radio3.setAttribute("style", "appearance: radio !important;");
     radio3.id = "category";
     const label3 = document.createElement("label");
     label3.htmlFor = "category";
@@ -180,7 +177,7 @@ function filterTable() {
     // End of radio buttons
     // Toggle search block with Ctrl + Shift + F
     document.addEventListener("keydown", e => {
-      if (e.ctrlKey && e.shiftKey && e.code === "KeyF") {
+      if (e.ctrlKey && e.shiftKey && e.key === "F") {
         searchBlock.style.display = searchBlock.style.display === "none" ? "block" : "none";
         if (searchBlock.style.display === "none") {
           input.value = "";
@@ -212,6 +209,7 @@ function filterTable() {
       if (thIndex !== -1) {
         const rows = table.querySelectorAll("tbody tr");
         rows.forEach(row => {
+          if (row.classList.contains("summary-row")) return;
           const cells = row.cells[thIndex];
           const cellText = cells.textContent.toLowerCase().trim();
           if (cellText.includes(searchTerm)) {
@@ -226,14 +224,9 @@ function filterTable() {
     const observer = new MutationObserver(() => {
       const newTable = document.querySelector("table");
       if (newTable && newTable !== table) {
-        observer.disconnect();
         table = newTable;
-        initialTfoot();
+        createTfoot(table);
         calculateTotals();
-        observer.observe(document.body, {
-          childList: true,
-          subtree: true
-        });
       }
     });
     observer.observe(document.body, {
@@ -241,6 +234,7 @@ function filterTable() {
       subtree: true
     });
   }
+  // Function to create tfoot with totals
   const table = document.querySelector("table");
   if (table) {
     init(table);
