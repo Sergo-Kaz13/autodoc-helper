@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Warehouse Helper
 // @namespace    https://github.com/Sergo-Kaz13/autodoc-helper
-// @version      1.0.2
+// @version      1.0.3
 // @description  Automates warehouse workflow on m13.autodoc.de: auto-login, AWS/TWO printing and table filtering
 // @author       Sergo_Kaz
 // @match        http://127.0.0.1:5500/*
@@ -35,6 +35,7 @@ function filterTable() {
   // Get table reference
   function init(table) {
     function createTfoot(table) {
+      if (table.querySelector(".summary-row")) return;
       const colCount = table.querySelector("thead tr")?.cells.length ?? 0;
       if (!colCount) return; // таблиця без thead — виходимо
       const headers = Array.from(table.querySelectorAll("thead th"));
@@ -649,7 +650,7 @@ function printTWO() {
         const packed = parseInt(cells[indexes.packed].textContent.trim());
         return qty !== packed;
       });
-      if (!rowToProcess) continue;
+      if (!rowToProcess) break;
       console.log(rowToProcess);
       const articleNo = rowToProcess.children[indexes.article].textContent.trim();
       const packedBefore = parseInt(rowToProcess.children[indexes.packed].textContent.trim());
