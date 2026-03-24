@@ -4,6 +4,8 @@ export function filterTable() {
   // Get table reference
   function init(table) {
     function createTfoot(table) {
+      if (table.querySelector(".summary-row")) return;
+
       const colCount = table.querySelector("thead tr")?.cells.length ?? 0;
       if (!colCount) return; // таблиця без thead — виходимо
       const headers = Array.from(table.querySelectorAll("thead th"));

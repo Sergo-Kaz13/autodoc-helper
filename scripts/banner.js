@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Warehouse Helper
 // @namespace    https://github.com/Sergo-Kaz13/autodoc-helper
-// @version      1.0.2
+// @version      1.0.3
 // @description  Automates warehouse workflow on m13.autodoc.de: auto-login, AWS/TWO printing and table filtering
 // @author       Sergo_Kaz
 // @match        http://127.0.0.1:5500/*

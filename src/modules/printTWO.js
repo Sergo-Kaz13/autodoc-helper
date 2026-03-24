@@ -54,7 +54,7 @@ export function printTWO() {
         const packed = parseInt(cells[indexes.packed].textContent.trim());
         return qty !== packed;
       });
-      if (!rowToProcess) continue;
+      if (!rowToProcess) break;
       console.log(rowToProcess);
       const articleNo =
         rowToProcess.children[indexes.article].textContent.trim();
