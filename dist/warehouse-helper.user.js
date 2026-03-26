@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Warehouse Helper
 // @namespace    https://github.com/Sergo-Kaz13/autodoc-helper
-// @version      1.0.3
+// @version      1.0.4
 // @description  Automates warehouse workflow on m13.autodoc.de: auto-login, AWS/TWO printing and table filtering
 // @author       Sergo_Kaz
 // @match        http://127.0.0.1:5500/*
@@ -52,14 +52,14 @@ function filterTable() {
         if (i === qtyIndex) {
           td.id = "totalQty";
           td.style.color = "white";
-          td.style.fontWeight = "bold";
-          //td.style.backgroundColor = "white";
+          td.style.fontWeight = "semibold";
+          td.style.fontSize = "16px";
           td.textContent = "0";
         } else if (i === packedIndex) {
           td.id = "totalPackedQty";
           td.style.color = "white";
-          td.style.fontWeight = "bold";
-          //td.style.backgroundColor = "white";
+          td.style.fontWeight = "semibold";
+          td.style.fontSize = "16px";
           td.textContent = "0";
         }
         tfoodRow.appendChild(td);
@@ -516,36 +516,35 @@ function printAWS() {
     btnPrint.style.boxShadow = "none";
   });
   let clickTimer = null;
+  let isDoubleClick = false;
   btnPrint.addEventListener("click", e => {
-    //e.preventDefault(); // щоб не переходити по href
+    isDoubleClick = false;
     clickTimer = setTimeout(() => {
+      if (isDoubleClick) return;
       const printTRF = document.querySelectorAll(".aside-info__item span");
       if (!printTRF.length) {
         console.error("Не знайдено TRF елемент!");
         return;
       }
-      //console.log(printTRF[2].textContent)
       const numberTRF = printTRF[2].textContent.replace(/\D/g, "");
-      //console.log(numberTRF)
       if (!numberTRF) {
         console.error("Не вдалося отримати номер TRF!");
         return;
       }
       const url = `https://aws.autodoc.de/store/transfer/list-pdf/${numberTRF}/list?palletsCount=1`;
       window.open(url, "_blank");
-    }, 250);
+    }, 300);
   });
   // dblclick
   btnPrint.addEventListener("dblclick", () => {
+    isDoubleClick = true;
     clearTimeout(clickTimer);
     const printTRF = document.querySelectorAll(".aside-info__item span");
     if (!printTRF.length) {
       console.error("Не знайдено TRF елемент!");
       return;
     }
-    //console.log(printTRF[2].textContent)
     const numberTRF = printTRF[2].textContent.replace(/\D/g, "");
-    //console.log(numberTRF)
     if (!numberTRF) {
       console.error("Не вдалося отримати номер TRF!");
       return;
@@ -622,9 +621,18 @@ function printTWO() {
     }
     btn.disabled = true; // щоб не клікали 10 разів
     btn.textContent = "Processing...";
-    await processTable();
-    btn.textContent = "Done ✅";
-    btn.disabled = false;
+    try {
+      await processTable();
+      btn.textContent = "Done ✅";
+    } catch (e) {
+      console.error(e);
+      btn.textContent = "Error ❌";
+    } finally {
+      setTimeout(() => {
+        btn.textContent = "Print TWO";
+        btn.disabled = false;
+      }, 1500);
+    }
   });
   function getColumnIndexes() {
     const headers = Array.from(document.querySelectorAll("table thead th"));
@@ -653,10 +661,13 @@ function printTWO() {
       if (!rowToProcess) break;
       console.log(rowToProcess);
       const articleNo = rowToProcess.children[indexes.article].textContent.trim();
+      if (!articleNo) {
+        console.warn("Skip row without articleNo");
+        continue;
+      }
       const packedBefore = parseInt(rowToProcess.children[indexes.packed].textContent.trim());
       await processArticle(articleNo);
       await waitForRowUpdate(articleNo, packedBefore);
-      //await waitForDomUpdate();
     }
     console.log("Все оброблено ✅");
   }

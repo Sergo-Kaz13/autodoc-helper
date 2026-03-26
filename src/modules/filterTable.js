@@ -26,14 +26,14 @@ export function filterTable() {
         if (i === qtyIndex) {
           td.id = "totalQty";
           td.style.color = "white";
-          td.style.fontWeight = "bold";
-          //td.style.backgroundColor = "white";
+          td.style.fontWeight = "semibold";
+          td.style.fontSize = "16px";
           td.textContent = "0";
         } else if (i === packedIndex) {
           td.id = "totalPackedQty";
           td.style.color = "white";
-          td.style.fontWeight = "bold";
-          //td.style.backgroundColor = "white";
+          td.style.fontWeight = "semibold";
+          td.style.fontSize = "16px";
           td.textContent = "0";
         }
         tfoodRow.appendChild(td);

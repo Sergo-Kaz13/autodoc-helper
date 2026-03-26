@@ -31,36 +31,38 @@ export function printAWS() {
     btnPrint.style.boxShadow = "none";
   });
   let clickTimer = null;
+  let isDoubleClick = false;
+
   btnPrint.addEventListener("click", (e) => {
-    //e.preventDefault(); // щоб не переходити по href
+    isDoubleClick = false;
+
     clickTimer = setTimeout(() => {
+      if (isDoubleClick) return;
       const printTRF = document.querySelectorAll(".aside-info__item span");
       if (!printTRF.length) {
         console.error("Не знайдено TRF елемент!");
         return;
       }
-      //console.log(printTRF[2].textContent)
       const numberTRF = printTRF[2].textContent.replace(/\D/g, "");
-      //console.log(numberTRF)
       if (!numberTRF) {
         console.error("Не вдалося отримати номер TRF!");
         return;
       }
       const url = `https://aws.autodoc.de/store/transfer/list-pdf/${numberTRF}/list?palletsCount=1`;
       window.open(url, "_blank");
-    }, 250);
+    }, 300);
   });
   // dblclick
   btnPrint.addEventListener("dblclick", () => {
+    isDoubleClick = true;
     clearTimeout(clickTimer);
+
     const printTRF = document.querySelectorAll(".aside-info__item span");
     if (!printTRF.length) {
       console.error("Не знайдено TRF елемент!");
       return;
     }
-    //console.log(printTRF[2].textContent)
     const numberTRF = printTRF[2].textContent.replace(/\D/g, "");
-    //console.log(numberTRF)
     if (!numberTRF) {
       console.error("Не вдалося отримати номер TRF!");
       return;

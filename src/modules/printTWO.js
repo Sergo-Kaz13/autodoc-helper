@@ -26,9 +26,19 @@ export function printTWO() {
     }
     btn.disabled = true; // щоб не клікали 10 разів
     btn.textContent = "Processing...";
-    await processTable();
-    btn.textContent = "Done ✅";
-    btn.disabled = false;
+
+    try {
+      await processTable();
+      btn.textContent = "Done ✅";
+    } catch (e) {
+      console.error(e);
+      btn.textContent = "Error ❌";
+    } finally {
+      setTimeout(() => {
+        btn.textContent = "Print TWO";
+        btn.disabled = false;
+      }, 1500);
+    }
   });
   function getColumnIndexes() {
     const headers = Array.from(document.querySelectorAll("table thead th"));
@@ -58,12 +68,15 @@ export function printTWO() {
       console.log(rowToProcess);
       const articleNo =
         rowToProcess.children[indexes.article].textContent.trim();
+      if (!articleNo) {
+        console.warn("Skip row without articleNo");
+        continue;
+      }
       const packedBefore = parseInt(
         rowToProcess.children[indexes.packed].textContent.trim(),
       );
       await processArticle(articleNo);
       await waitForRowUpdate(articleNo, packedBefore);
-      //await waitForDomUpdate();
     }
     console.log("Все оброблено ✅");
   }
