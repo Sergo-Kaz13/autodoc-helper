@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Warehouse Helper
 // @namespace    https://github.com/Sergo-Kaz13/autodoc-helper
-// @version      1.0.4
+// @version      1.0.5
 // @description  Automates warehouse workflow on m13.autodoc.de: auto-login, AWS/TWO printing and table filtering
 // @author       Sergo_Kaz
 // @match        http://127.0.0.1:5500/*
@@ -656,6 +656,9 @@ function printTWO() {
         const cells = row.children;
         const qty = parseInt(cells[indexes.qty].textContent.trim());
         const packed = parseInt(cells[indexes.packed].textContent.trim());
+        const articleNo = cells[indexes.article].textContent.trim();
+        if (isNaN(qty) || isNaN(packed)) return false;
+        if (!articleNo) return false;
         return qty !== packed;
       });
       if (!rowToProcess) break;

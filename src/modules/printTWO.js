@@ -62,6 +62,10 @@ export function printTWO() {
         const cells = row.children;
         const qty = parseInt(cells[indexes.qty].textContent.trim());
         const packed = parseInt(cells[indexes.packed].textContent.trim());
+        const articleNo = cells[indexes.article].textContent.trim();
+
+        if (isNaN(qty) || isNaN(packed)) return false;
+        if (!articleNo) return false;
         return qty !== packed;
       });
       if (!rowToProcess) break;
